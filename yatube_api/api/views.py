@@ -5,19 +5,23 @@ from posts.models import Comment, Group, Post
 from .permissions import IsAuthorOrReadOnly
 from .serializers import CommentSerializer, GroupSerializer, PostSerializer
 
+
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
     permission_classes = (IsAuthenticated, IsAuthorOrReadOnly)
     lookup_value_regex = r'\d+'
+
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
+
 
 class GroupViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
     permission_classes = (IsAuthenticated,)
     lookup_value_regex = r'\d+'
+
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
@@ -34,5 +38,7 @@ class CommentViewSet(viewsets.ModelViewSet):
         return Comment.objects.all()
 
     def perform_create(self, serializer):
-        post = get_object_or_404(Post, id=self.kwargs.get('post_id'))
+        post = get_object_or_404(
+            Post, id=self.kwargs.get('post_id')
+        )
         serializer.save(author=self.request.user, post=post)
